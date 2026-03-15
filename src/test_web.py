@@ -146,7 +146,7 @@ def navigate_to_environment_definition(driver):
         logger.info("✅ 环境定义点击成功")
         
         # 4. 等待环境定义页面加载完成
-        wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(text(), '新增环境')]")))
+        wait.until(EC.presence_of_element_located((By.XPATH, "//span[contains(normalize-space(), '新增环境')]")))
         logger.info("✅ 环境定义页面加载完成")
         
         return True
@@ -169,13 +169,16 @@ def maintain_environment_info(driver):
         # 1. 点击新增环境按钮
         logger.info("开始点击新增环境按钮")
         add_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '新增环境')]"))
+            EC.element_to_be_clickable((By.XPATH, "//span[contains(normalize-space(), '新增环境')]"))
         )
         add_button.click()
         logger.info("✅ 点击新增环境按钮成功")
         
+        # 等待页面响应
+        time.sleep(2)
+        
         # 2. 等待表单弹窗加载
-        wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'dialog') or contains(@class, 'modal')]")))
+        wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'el-dialog__title') and contains(text(), '新增环境')]")))
         logger.info("✅ 表单弹窗加载完成")
         
         # 3. 填写环境编码
@@ -208,6 +211,8 @@ def maintain_environment_info(driver):
         
         # 6. 填写备注
         logger.info("开始填写备注")
+        # 等待备注字段出现
+        time.sleep(1)
         remark = wait.until(
             EC.presence_of_element_located((By.XPATH, "//textarea[contains(@placeholder, '备注')]"))
         )
@@ -237,7 +242,7 @@ def maintain_environment_info(driver):
             logger.warning(f"⚠️ 保存成功提示未找到：{str(e)}")
         
         # 11. 等待弹窗关闭
-        wait.until(EC.invisibility_of_element_located((By.XPATH, "//div[contains(@class, 'dialog') or contains(@class, 'modal')]")))
+        wait.until(EC.invisibility_of_element_located((By.XPATH, "//div[contains(@class, 'el-dialog__title') and contains(text(), '新增环境')]")))
         logger.info("✅ 表单弹窗关闭成功")
         
         # 12. 等待页面刷新
