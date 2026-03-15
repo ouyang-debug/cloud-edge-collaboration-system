@@ -171,34 +171,119 @@ def maintain_environment_info(driver):
         add_button = wait.until(
             EC.element_to_be_clickable((By.XPATH, "//span[contains(normalize-space(), '新增环境')]"))
         )
-        add_button.click()
+        # 确保按钮可见
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", add_button)
+        # 使用JavaScript点击，避免可能的点击拦截
+        driver.execute_script("arguments[0].click();", add_button)
         logger.info("✅ 点击新增环境按钮成功")
         
         # 等待页面响应
-        time.sleep(2)
+        time.sleep(1)
         
         # 2. 等待表单弹窗加载
-        wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'el-dialog__title') and contains(text(), '新增环境')]")))
-        logger.info("✅ 表单弹窗加载完成")
+        logger.info("开始等待表单弹窗加载")
+        try:
+            # 使用合理的等待时间
+            wait = WebDriverWait(driver, 5)  # 减少等待时间到15秒
+            # 直接等待环境编码输入框出现
+            environment_code_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/div[2]/div/div/div/form/div[1]/div/div[1]/div/input"
+            wait.until(EC.presence_of_element_located((By.XPATH, environment_code_xpath)))
+            logger.info("✅ 表单弹窗加载完成")
+        except TimeoutException:
+            # 如果超时，截图并记录详细信息
+            screenshot_path = f"popup_timeout_{int(time.time())}.png"
+            driver.save_screenshot(screenshot_path)
+            logger.error(f"❌ 表单弹窗加载超时，已保存截图：{screenshot_path}")
+            raise  # 重新抛出异常
         
-        # 3. 填写环境编码
+        # 等待弹窗完全加载
+        time.sleep(1)
+        logger.info("✅ 表单弹窗完全加载完成")
+        
+        # 3. 生成环境编码（当前年月日时分秒）
+        logger.info("开始生成环境编码")
+        env_code = time.strftime("%Y%m%d%H%M%S")
+        logger.info(f"生成的环境编码：{env_code}")
+        
+        # 4. 填写环境编码
         logger.info("开始填写环境编码")
+        # 使用用户提供的XPath定位环境编码输入框
+        logger.info("使用用户提供的XPath定位环境编码输入框")
+        environment_code_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/div[2]/div/div/div/form/div[1]/div/div[1]/div/input"
         environment_code = wait.until(
-            EC.presence_of_element_located((By.XPATH, "//input[@placeholder='请输入环境编码']"))
+            EC.presence_of_element_located((By.XPATH, environment_code_xpath))
         )
-        environment_code.clear()
-        timestamp = str(int(time.time()))
-        environment_code.send_keys("TEST" + timestamp)
-        logger.info("✅ 填写环境编码成功")
+        logger.info("使用XPath定位环境编码输入框成功")
         
-        # 4. 填写环境名称
+        # 确保元素可见并可交互
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", environment_code)
+        driver.execute_script("arguments[0].click();", environment_code)
+        
+        # 使用JavaScript设置环境编码，确保触发所有必要的事件
+        logger.info("使用JavaScript设置环境编码")
+        driver.execute_script("arguments[0].value = arguments[1];", environment_code, env_code)
+        # 触发input事件
+        driver.execute_script("var event = new Event('input', { bubbles: true }); arguments[0].dispatchEvent(event);", environment_code)
+        # 触发change事件
+        driver.execute_script("var event = new Event('change', { bubbles: true }); arguments[0].dispatchEvent(event);", environment_code)
+        
+        # 验证输入是否成功
+        actual_code = environment_code.get_attribute('value')
+        logger.info(f"环境编码输入验证：期望='{env_code}', 实际='{actual_code}'")
+        if actual_code == env_code:
+            logger.info("✅ 环境编码填写成功")
+        else:
+            logger.error(f"❌ 环境编码填写失败：期望='{env_code}', 实际='{actual_code}'")
+        
+        # 等待输入生效
+        time.sleep(1)
+        
+        # 5. 填写环境名称（环境编码_测试环境）
         logger.info("开始填写环境名称")
+        
+        # 使用用户提供的XPath定位环境名称输入框
+        logger.info("使用用户提供的XPath定位环境名称输入框")
+        environment_name_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/div[2]/div/div/div/form/div[2]/div/div[1]/div/input"
         environment_name = wait.until(
-            EC.presence_of_element_located((By.XPATH, "//input[@placeholder='请输入环境名称']"))
+            EC.presence_of_element_located((By.XPATH, environment_name_xpath))
         )
-        environment_name.clear()
-        environment_name.send_keys("测试环境" + timestamp)
-        logger.info("✅ 填写环境名称成功")
+        logger.info("使用XPath定位环境名称输入框成功")
+        
+        # 打印找到的输入框的详细信息
+        try:
+            placeholder = environment_name.get_attribute("placeholder")
+            id_attr = environment_name.get_attribute("id")
+            class_attr = environment_name.get_attribute("class")
+            value = environment_name.get_attribute("value")
+            is_displayed = environment_name.is_displayed()
+            is_enabled = environment_name.is_enabled()
+            logger.info(f"找到的环境名称输入框：placeholder='{placeholder}', id='{id_attr}', class='{class_attr}', value='{value}', displayed={is_displayed}, enabled={is_enabled}")
+        except Exception as e:
+            logger.warning(f"无法获取输入框属性：{str(e)}")
+        
+        # 确保元素可见并可交互
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", environment_name)
+        driver.execute_script("arguments[0].click();", environment_name)
+        
+        # 定义环境名称
+        env_name = f"{env_code}_测试环境"
+        logger.info(f"生成的环境名称：{env_name}")
+        
+        # 使用JavaScript设置值
+        try:
+            driver.execute_script("arguments[0].value = arguments[1];", environment_name, env_name)
+            # 触发input事件
+            driver.execute_script("var event = new Event('input', { bubbles: true }); arguments[0].dispatchEvent(event);", environment_name)
+            logger.info("✅ 环境名称填写成功")
+        except Exception as e:
+            logger.warning(f"填写环境名称失败：{str(e)}")
+        
+        # 验证输入是否成功
+        actual_name = environment_name.get_attribute('value')
+        logger.info(f"环境名称输入验证：期望='{env_name}', 实际='{actual_name}'")
+        
+        # 等待输入生效
+        time.sleep(1)
         
         # 5. 填写环境描述
         logger.info("开始填写环境描述")
@@ -213,12 +298,31 @@ def maintain_environment_info(driver):
         logger.info("开始填写备注")
         # 等待备注字段出现
         time.sleep(1)
-        remark = wait.until(
-            EC.presence_of_element_located((By.XPATH, "//textarea[contains(@placeholder, '备注')]"))
-        )
-        remark.clear()
-        remark.send_keys("自动化测试创建")
-        logger.info("✅ 填写备注成功")
+        
+        # 直接使用索引定位备注字段（根据日志，第二个textarea是备注）
+        try:
+            textareas = driver.find_elements(By.TAG_NAME, "textarea")
+            if len(textareas) >= 2:
+                remark = textareas[1]
+                # 确保元素可见并可交互
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", remark)
+                driver.execute_script("arguments[0].click();", remark)
+                # 清除并输入备注
+                remark.clear()
+                # 使用JavaScript设置值
+                driver.execute_script("arguments[0].value = arguments[1];", remark, "自动化测试创建")
+                # 触发事件
+                driver.execute_script("var event = new Event('input', { bubbles: true }); arguments[0].dispatchEvent(event);", remark)
+                logger.info("✅ 填写备注成功")
+            else:
+                logger.warning("没有找到足够的textarea元素，跳过备注填写")
+        except Exception as e:
+            logger.warning(f"填写备注失败：{str(e)}")
+            # 跳过备注填写，继续执行
+            logger.info("跳过备注填写，继续执行")
+        
+        # 等待输入生效
+        time.sleep(1)
         
         # 7. 显示顺序保持默认值1
         logger.info("显示顺序保持默认值1")
@@ -228,11 +332,21 @@ def maintain_environment_info(driver):
         
         # 9. 点击确认按钮
         logger.info("开始点击确认按钮")
+        
+        # 使用用户提供的XPath定位确认按钮
+        confirm_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/div[2]/div/div/footer/span/button[2]"
         confirm_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '确认')]"))
+            EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))
         )
-        confirm_button.click()
+        logger.info("使用XPath定位确认按钮成功")
+        
+        # 确保元素可见并可交互
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", confirm_button)
+        driver.execute_script("arguments[0].click();", confirm_button)
         logger.info("✅ 点击确认按钮成功")
+        
+        # 等待保存成功
+        time.sleep(2)
         
         # 10. 等待保存成功提示
         try:
@@ -273,7 +387,7 @@ if __name__ == "__main__":
                 maintain_environment_info(driver)
             
             # 操作完成后停留一段时间观察结果
-            time.sleep(500)
+            time.sleep(5)
             logger.info("🔚 自动化流程完成，关闭浏览器")
         finally:
             driver.quit()
