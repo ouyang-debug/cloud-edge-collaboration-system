@@ -403,35 +403,37 @@ def click_new_task_button(driver):
         driver.save_screenshot(screenshot_path)
         logger.info(f"已保存插件选择窗口截图：{screenshot_path}")
 
-        # 选择shell插件
-        logger.info("开始选择shell插件")
-        # 尝试多种方式定位shell插件按钮
-        shell_plugin_xpaths = [
-            "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[10]/div/div/div/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[1]/td[9]/div/button/span",  # 原始路径
-            "//button[contains(text(), '选择')]",  # 通过文本定位
-            "//table/tbody/tr[1]/td[last()]/div/button"  # 通过表格结构定位
+        # 选择dockercapture插件
+        logger.info("开始选择dockercapture插件")
+        # 尝试多种方式定位dockercapture插件按钮
+
+        dockercapture_plugin_xpaths = [
+            "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[10]/div/div/div/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[9]/td[9]/div/button/span"
+            # "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[10]/div/div/div/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[1]/td[9]/div/button/span",  # 原始路径
+            # "//button[contains(text(), '选择')]",  # 通过文本定位
+            # "//table/tbody/tr[1]/td[last()]/div/button"  # 通过表格结构定位
         ]
 
-        shell_plugin_button = None
-        for xpath in shell_plugin_xpaths:
+        dockercapture_plugin_button = None
+        for xpath in dockercapture_plugin_xpaths:
             try:
-                logger.info(f"尝试使用XPath {xpath} 定位shell插件按钮")
-                shell_plugin_button = wait.until(
+                logger.info(f"尝试使用XPath {xpath} 定位dockercapture插件按钮")
+                dockercapture_plugin_button = wait.until(
                     EC.element_to_be_clickable((By.XPATH, xpath))
                 )
-                logger.info("✅ 找到shell插件按钮")
+                logger.info("✅ 找到dockercapture插件按钮")
                 break
             except Exception as e:
-                logger.warning(f"使用XPath {xpath} 定位shell插件按钮失败：{str(e)}")
+                logger.warning(f"使用XPath {xpath} 定位dockercapture插件按钮失败：{str(e)}")
 
-        if not shell_plugin_button:
-            raise Exception("没有找到shell插件按钮")
+        if not dockercapture_plugin_button:
+            raise Exception("没有找到dockercapture插件按钮")
 
         # 确保按钮可见
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", shell_plugin_button)
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", dockercapture_plugin_button)
         # 使用JavaScript点击，避免可能的点击拦截
-        driver.execute_script("arguments[0].click();", shell_plugin_button)
-        logger.info("✅ 选择shell插件成功")
+        driver.execute_script("arguments[0].click();", dockercapture_plugin_button)
+        logger.info("✅ 选择dockercapture插件成功")
 
         # 等待插件选择窗口关闭
         logger.info("等待插件选择窗口关闭")
@@ -442,14 +444,14 @@ def click_new_task_button(driver):
             wait.until(EC.invisibility_of_element_located((By.XPATH, "//div[contains(@class, 'el-dialog')]")))
         logger.info("✅ 插件选择窗口关闭成功")
 
-        # 填写插件标识（shell）
+        # 填写插件标识（dockercapture）
         logger.info("开始填写插件标识")
         plugin_id_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/div/div/form/div[4]/div[2]/div[6]/div/div/div/input"
         plugin_id_input = wait.until(
             EC.element_to_be_clickable((By.XPATH, plugin_id_xpath))
         )
         plugin_id_input.clear()
-        plugin_id_input.send_keys("shell")
+        plugin_id_input.send_keys("dockercapture")
         logger.info("✅ 填写插件标识成功")
 
         # 填写Command（echo 'hello world'）
@@ -459,7 +461,7 @@ def click_new_task_button(driver):
             EC.element_to_be_clickable((By.XPATH, command_xpath))
         )
         command_input.clear()
-        command_input.send_keys("df -h")
+        command_input.send_keys("dockerstats")
         logger.info("✅ 填写Command成功")
 
         # 点击确认按钮
