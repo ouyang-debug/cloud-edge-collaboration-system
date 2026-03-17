@@ -157,9 +157,9 @@ def navigate_to_resource_association_service(driver):
     except Exception as e:
         logger.error(f"❌ 导航到资源关联服务失败：{str(e)}")
         # 截图保存以便调试
-        screenshot_path = f"resource_service_error_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.error(f"❌ 已保存错误截图：{screenshot_path}")
+        # screenshot_path = f"resource_service_error_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.error(f"❌ 已保存错误截图：{screenshot_path}")
         return False
 
 
@@ -202,9 +202,9 @@ def select_environment_and_service(driver):
         # 等待测试环境展开
         time.sleep(1)
         # 截图确认展开状态
-        screenshot_path = f"environment_expanded_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.info(f"已保存测试环境展开状态截图：{screenshot_path}")
+        # screenshot_path = f"environment_expanded_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.info(f"已保存测试环境展开状态截图：{screenshot_path}")
 
         # 3. 选择北京电厂有限公司
         logger.info("开始选择北京电厂有限公司")
@@ -225,9 +225,9 @@ def select_environment_and_service(driver):
         # 等待页面响应
         time.sleep(1)
         # 截图确认北京电厂有限公司展开状态
-        screenshot_path = f"company_expanded_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.info(f"已保存北京电厂有限公司展开状态截图：{screenshot_path}")
+        # screenshot_path = f"company_expanded_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.info(f"已保存北京电厂有限公司展开状态截图：{screenshot_path}")
 
         # 4. 选择虚拟机A
         logger.info("开始选择虚拟机A")
@@ -249,9 +249,9 @@ def select_environment_and_service(driver):
     except Exception as e:
         logger.error(f"❌ 选择环境和服务失败：{str(e)}")
         # 截图保存以便调试
-        screenshot_path = f"select_error_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.error(f"❌ 已保存错误截图：{screenshot_path}")
+        # screenshot_path = f"select_error_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.error(f"❌ 已保存错误截图：{screenshot_path}")
         return False
 
 
@@ -279,9 +279,9 @@ def click_new_task_button(driver):
         logger.info("开始选择执行Agent")
         
         # 截图当前状态，便于调试
-        screenshot_path = f"before_agent_click_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.info(f"已保存执行Agent操作前截图：{screenshot_path}")
+        # screenshot_path = f"before_agent_click_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.info(f"已保存执行Agent操作前截图：{screenshot_path}")
         
         # 1. 找到执行Agent输入框
         logger.info("定位执行Agent输入框")
@@ -303,9 +303,9 @@ def click_new_task_button(driver):
         wait.until(EC.presence_of_element_located((By.XPATH, "//ul[contains(@class, 'el-select-dropdown__list')]")))
 
         # 5. 截图当前状态，便于调试
-        screenshot_path = f"agent_dropdown_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.info(f"已保存执行Agent下拉菜单截图：{screenshot_path}")
+        # screenshot_path = f"agent_dropdown_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.info(f"已保存执行Agent下拉菜单截图：{screenshot_path}")
 
         # 6. 定位并选择执行Agent选项
         logger.info("定位执行Agent选项")
@@ -399,9 +399,9 @@ def click_new_task_button(driver):
             logger.info("✅ 插件选择窗口弹出成功（使用通用定位器）")
 
         # 截图当前状态，便于调试
-        screenshot_path = f"plugin_window_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.info(f"已保存插件选择窗口截图：{screenshot_path}")
+        # screenshot_path = f"plugin_window_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.info(f"已保存插件选择窗口截图：{screenshot_path}")
 
         # 选择dockercapture插件
         logger.info("开始选择dockercapture插件")
@@ -463,7 +463,7 @@ def click_new_task_button(driver):
         command_input.clear()
         command_input.send_keys("dockerstats")
         logger.info("✅ 填写Command成功")
-
+        # time.sleep(5)  # 5分钟等待时间
         # 点击确认按钮
         logger.info("开始点击确认按钮")
         confirm_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/footer/span/button[2]/span"
@@ -486,9 +486,9 @@ def click_new_task_button(driver):
     except Exception as e:
         logger.error(f"❌ 点击新建任务按钮失败：{str(e)}")
         # 截图保存以便调试
-        screenshot_path = f"new_task_error_{int(time.time())}.png"
-        driver.save_screenshot(screenshot_path)
-        logger.error(f"❌ 已保存错误截图：{screenshot_path}")
+        # screenshot_path = f"new_task_error_{int(time.time())}.png"
+        # driver.save_screenshot(screenshot_path)
+        # logger.error(f"❌ 已保存错误截图：{screenshot_path}")
         return False
 
 
@@ -511,7 +511,7 @@ if __name__ == "__main__":
             logger.info("🔚 自动化流程完成，等待用户手动操作")
             logger.info("请维护必要信息后点击确认按钮")
             # 停留一段时间让用户操作
-            time.sleep(300)  # 5分钟等待时间
+            time.sleep(5)  # 5分钟等待时间
             logger.info("🔚 等待时间结束，关闭浏览器")
         finally:
             driver.quit()
