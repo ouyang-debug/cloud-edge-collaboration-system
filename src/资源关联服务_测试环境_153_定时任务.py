@@ -392,23 +392,55 @@ def click_new_task_button(driver):
         
         # 填写Cron表达式（10秒执行一次）
         logger.info("开始填写Cron表达式")
-        # 使用用户提供的精确XPath路径定位Cron表达式输入框
+        # 使用更通用的XPath路径定位Cron表达式输入框
         cron_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/div/div/form/div[2]/div[1]/div[1]/div/div/div[1]/div/input"
         cron_input = wait.until(
             EC.element_to_be_clickable((By.XPATH, cron_xpath))
         )
         # 确保元素可见
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", cron_input)
-        # 清除输入框内容
+        
+        # 方法1：使用send_keys，逐个字符输入，确保空格被正确处理
+        logger.info("使用send_keys方法填写Cron表达式")
         cron_input.clear()
-        # 填写Cron表达式
-        cron_input.send_keys("*/10 * * * * ?")  # 10秒执行一次
-        logger.info("✅ 填写Cron表达式成功")
+        cron_expression = "*/10 * * * *"
+        # 逐个字符输入，确保空格被正确处理
+        for char in cron_expression:
+            cron_input.send_keys(char)
+            time.sleep(0.1)  # 每个字符之间短暂等待
+        
+        # 触发输入框的多个事件，确保值被正确处理
+        driver.execute_script("arguments[0].dispatchEvent(new Event('input'));", cron_input)
+        driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", cron_input)
+        driver.execute_script("arguments[0].dispatchEvent(new Event('blur'));", cron_input)
+        logger.info(f"✅ 填写Cron表达式成功：{cron_expression}")
         
         # 截图当前状态，确认Cron表达式填写成功
         screenshot_path = f"cron_filled_{int(time.time())}.png"
         driver.save_screenshot(screenshot_path)
         logger.info(f"已保存Cron表达式填写成功截图：{screenshot_path}")
+        
+        # 验证Cron表达式是否正确填写
+        time.sleep(1)
+        actual_cron = cron_input.get_attribute("value")
+        logger.info(f"实际填写的Cron表达式：'{actual_cron}'")
+        if actual_cron == cron_expression:
+            logger.info("✅ Cron表达式验证成功")
+        else:
+            logger.warning(f"⚠️ Cron表达式验证失败，实际值与预期不符")
+            # 尝试方法2：使用JavaScript设置值
+            logger.info("尝试使用JavaScript设置Cron表达式值")
+            driver.execute_script(f"arguments[0].value = '{cron_expression}';", cron_input)
+            driver.execute_script("arguments[0].dispatchEvent(new Event('input'));", cron_input)
+            driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", cron_input)
+            # 再次验证
+            time.sleep(1)
+            actual_cron = cron_input.get_attribute("value")
+            logger.info(f"再次验证Cron表达式：'{actual_cron}'")
+            if actual_cron == cron_expression:
+                logger.info("✅ 方法2：Cron表达式验证成功")
+            else:
+                logger.error(f"❌ 方法2：Cron表达式验证失败")
         
         # 直接输入开始执行时间
         logger.info("开始设置开始执行时间")
@@ -420,7 +452,7 @@ def click_new_task_button(driver):
         # 确保元素可见
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", start_time_input)
         # 直接使用JavaScript设置输入框值
-        start_time = "20216-03-17 12:42:20"
+        start_time = "20216-03-17 14:29:20"
         driver.execute_script(f"arguments[0].value = '{start_time}';", start_time_input)
         logger.info(f"✅ 直接输入开始执行时间成功：{start_time}")
         
@@ -611,7 +643,7 @@ if __name__ == "__main__":
             logger.info("🔚 自动化流程完成，等待用户手动操作")
             logger.info("请维护必要信息后点击确认按钮")
             # 停留一段时间让用户操作
-            time.sleep(300)  # 5分钟等待时间
+            time.sleep(5)  # 5分钟等待时间
             logger.info("🔚 等待时间结束，关闭浏览器")
         finally:
             driver.quit()
