@@ -442,7 +442,7 @@ def click_new_task_button(driver):
             else:
                 logger.error(f"❌ 方法2：Cron表达式验证失败")
         
-        # 直接输入开始执行时间
+        # 直接输入开始执行时间（使用当前时间）
         logger.info("开始设置开始执行时间")
         # 定位开始执行时间输入框
         start_time_xpath = "//input[@placeholder='请选择时间']"
@@ -451,10 +451,41 @@ def click_new_task_button(driver):
         )
         # 确保元素可见
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", start_time_input)
-        # 直接使用JavaScript设置输入框值
-        start_time = "20216-03-17 14:29:20"
-        driver.execute_script(f"arguments[0].value = '{start_time}';", start_time_input)
-        logger.info(f"✅ 直接输入开始执行时间成功：{start_time}")
+        # 获取当前时间并格式化为正确的格式
+        start_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 方法1：使用send_keys输入时间
+        logger.info("使用send_keys方法设置开始执行时间")
+        start_time_input.clear()
+        start_time_input.send_keys(start_time)
+        
+        # 触发多个事件，确保值被正确处理
+        driver.execute_script("arguments[0].dispatchEvent(new Event('input'));", start_time_input)
+        driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", start_time_input)
+        driver.execute_script("arguments[0].dispatchEvent(new Event('blur'));", start_time_input)
+        
+        # 验证开始时间是否正确设置
+        time.sleep(1)
+        actual_start_time = start_time_input.get_attribute("value")
+        logger.info(f"实际设置的开始执行时间：'{actual_start_time}'")
+        
+        if actual_start_time == start_time:
+            logger.info("✅ 开始执行时间设置成功")
+        else:
+            logger.warning("⚠️ 开始执行时间设置失败，尝试使用JavaScript设置")
+            # 方法2：使用JavaScript设置值
+            driver.execute_script(f"arguments[0].value = '{start_time}';", start_time_input)
+            driver.execute_script("arguments[0].dispatchEvent(new Event('input'));", start_time_input)
+            driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", start_time_input)
+            
+            # 再次验证
+            time.sleep(1)
+            actual_start_time = start_time_input.get_attribute("value")
+            logger.info(f"再次验证开始执行时间：'{actual_start_time}'")
+            if actual_start_time == start_time:
+                logger.info("✅ 方法2：开始执行时间设置成功")
+            else:
+                logger.error("❌ 开始执行时间设置失败")
         
         # 截图当前状态，确认时间设置成功
         screenshot_path = f"time_set_{int(time.time())}.png"
