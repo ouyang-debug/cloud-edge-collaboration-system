@@ -470,7 +470,7 @@ def click_new_task_button(driver):
         # command_input.send_keys("dockerinspect")
         command_input.send_keys("dockerstats")
         logger.info("✅ 填写Command成功")
-
+        # time.sleep(10)
         # 点击确认按钮
         logger.info("开始点击确认按钮")
         confirm_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/footer/span/button[2]/span"
