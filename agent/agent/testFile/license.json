@@ -1,0 +1,9 @@
+{
+    "Broker": "10.220.42.152",
+    "Server": "http://10.220.42.152:8081/ceamcore",
+    "Username": "mqtt",
+    "Port": 8083,
+    "ClientID": "agent_772438364233797",
+    "Token": "xNdNJGNuWu9+xOX55h/ZvA==",
+    "Password": "mqtt12345"
+}

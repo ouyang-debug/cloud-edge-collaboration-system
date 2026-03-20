@@ -1,0 +1,6 @@
+AgentName: testAgent
+NetIf: WLAN
+StatusApi: /task-status
+ResultDataApi: /agent/dispatchdata
+ResultSyncApi: /agent/result_sync
+LogSyncApi: /logs

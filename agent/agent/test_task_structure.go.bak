@@ -1,0 +1,189 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+
+	"agent/plus"
+)
+
+func main() {
+	// 任务清单一：集成测试任务
+	taskJson1 := `{
+		"id": "T20251216005",
+		"name": "集成测试任务",
+		"executeMode": "manual",
+		"failTerminate": true,
+		"stepList": [
+			{
+				"sequence": 1,
+				"plugin": "shell",
+				"pluginVersion": "1.0",
+				"pluginConn": {
+					"host": "192.168.245.100",
+					"port": 22,
+					"username": "root",
+					"password": "123123"
+				},
+				"command": "echo 'Hello World'",
+				"input": [],
+				"output": "default"
+			},
+			{
+				"sequence": 2,
+				"plugin": "mysql",
+				"pluginVersion": "v0.0.1",
+				"pluginConn": {
+					"host": "192.168.1.201",
+					"port": 3306,
+					"database": "backup_db",
+					"username": "admin",
+					"password": "Encrypted(xxx)",
+					"charset": "utf8mb4",
+					"timeout": 60,
+					"sslMode": "disabled"
+				},
+				"input": [
+					{
+						"fileName": "backup.sql",
+						"fileUrl": "https://oss.example.com/task/sql/backup.sql",
+						"localPath": ".",
+						"basePath": "/xxx/xxx"
+					}
+				],
+				"output": "MySQL全量备份结果"
+			}
+		]
+	}`
+
+	// 任务清单二：每日K8s状态检查+MySQL数据备份
+	taskJson2 := `{
+		"id": "T20251216005",
+		"name": "每日K8s状态检查+MySQL数据备份",
+		"taskType": "cycle",
+		"executeMode": "sequence",
+		"failTerminate": true,
+		"cronConfig": {
+			"cronExpression": "0 3 * * *",
+			"timeZone": "Asia/Shanghai",
+			"startTime": "2025-12-17 00:00:00",
+			"endTime": "2026-12-31 23:59:59",
+			"missedStrategy": "ignore"
+		},
+		"stepList": [
+			{
+				"sequence": 1,
+				"plugin": "k8s",
+				"pluginVersion": "v0.0.1",
+				"pluginConn": {
+					"apiServer": "https://192.168.1.200:6443",
+					"kubeConfig": "https://oss.example.com/task/config/kubeconfig.yaml",
+					"authType": "token",
+					"token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkF...",
+					"caCert": "https://oss.example.com/task/cert/ca.crt",
+					"timeout": 30
+				},
+				"input": [
+					{
+						"fileName": "check.yaml",
+						"fileUrl": "https://oss.example.com/task/config/check.yaml",
+						"localPath": ".",
+						"basePath": "/xxx/xxx"
+					}
+				],
+				"output": "K8s集群状态检查结果"
+			},
+			{
+				"sequence": 2,
+				"plugin": "shell",
+				"pluginVersion": "1.0",
+				"command": "echo 'Test Complete'",
+				"input": [],
+				"output": "default"
+			}
+		]
+	}`
+
+	// 测试解析任务清单一
+	var task1 plus.Task
+	err := json.Unmarshal([]byte(taskJson1), &task1)
+	if err != nil {
+		log.Printf("Error parsing task 1: %v", err)
+	} else {
+		fmt.Println("=== Task 1 Parsed Successfully ===")
+		fmt.Printf("Task ID: %s\n", task1.ID)
+		fmt.Printf("Task Name: %s\n", task1.Name)
+		fmt.Printf("Task Type: %s\n", task1.TaskType)
+		fmt.Printf("Execute Mode: %s\n", task1.ExecuteMode)
+		fmt.Printf("Fail Terminate: %v\n", task1.FailTerminate)
+		fmt.Printf("Number of Steps: %d\n", len(task1.StepList))
+		for i, step := range task1.StepList {
+			fmt.Printf("Step %d: Plugin=%s, Version=%s\n", i+1, step.Plugin, step.PluginVersion)
+			if step.PluginConn != nil {
+				fmt.Println("  Plugin Connection:")
+				for k, v := range step.PluginConn {
+					fmt.Printf("    %s: %v\n", k, v)
+				}
+			}
+			if step.Command != "" {
+				fmt.Printf("  Command: %s\n", step.Command)
+			}
+			if len(step.Input) > 0 {
+				fmt.Println("  Input Files:")
+				for _, inputFile := range step.Input {
+					fmt.Printf("    FileName: %s\n", inputFile.FileName)
+					fmt.Printf("    FileUrl: %s\n", inputFile.FileUrl)
+					fmt.Printf("    LocalPath: %s\n", inputFile.LocalPath)
+					fmt.Printf("    BasePath: %s\n", inputFile.BasePath)
+				}
+			}
+			fmt.Printf("  Output: %s\n", step.Output)
+		}
+	}
+
+	// 测试解析任务清单二
+	var task2 plus.Task
+	err = json.Unmarshal([]byte(taskJson2), &task2)
+	if err != nil {
+		log.Printf("Error parsing task 2: %v", err)
+	} else {
+		fmt.Println("\n=== Task 2 Parsed Successfully ===")
+		fmt.Printf("Task ID: %s\n", task2.ID)
+		fmt.Printf("Task Name: %s\n", task2.Name)
+		fmt.Printf("Task Type: %s\n", task2.TaskType)
+		fmt.Printf("Execute Mode: %s\n", task2.ExecuteMode)
+		fmt.Printf("Fail Terminate: %v\n", task2.FailTerminate)
+		if task2.CronConfig != nil {
+			fmt.Println("Cron Config:")
+			fmt.Printf("  Cron Expression: %s\n", task2.CronConfig.CronExpression)
+			fmt.Printf("  Time Zone: %s\n", task2.CronConfig.TimeZone)
+			fmt.Printf("  Start Time: %s\n", task2.CronConfig.StartTime)
+			fmt.Printf("  End Time: %s\n", task2.CronConfig.EndTime)
+			fmt.Printf("  Missed Strategy: %s\n", task2.CronConfig.MissedStrategy)
+		}
+		fmt.Printf("Number of Steps: %d\n", len(task2.StepList))
+		for i, step := range task2.StepList {
+			fmt.Printf("Step %d: Plugin=%s, Version=%s\n", i+1, step.Plugin, step.PluginVersion)
+			if step.PluginConn != nil {
+				fmt.Println("  Plugin Connection:")
+				for k, v := range step.PluginConn {
+					fmt.Printf("    %s: %v\n", k, v)
+				}
+			}
+			if step.Command != "" {
+				fmt.Printf("  Command: %s\n", step.Command)
+			}
+			if len(step.Input) > 0 {
+				fmt.Println("  Input Files:")
+				for _, inputFile := range step.Input {
+					fmt.Printf("    FileName: %s\n", inputFile.FileName)
+					fmt.Printf("    FileUrl: %s\n", inputFile.FileUrl)
+					fmt.Printf("    LocalPath: %s\n", inputFile.LocalPath)
+					fmt.Printf("    BasePath: %s\n", inputFile.BasePath)
+				}
+			}
+			fmt.Printf("  Output: %s\n", step.Output)
+		}
+	}
+}

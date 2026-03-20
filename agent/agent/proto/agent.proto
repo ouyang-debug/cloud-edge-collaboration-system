@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+package agent;
+
+option go_package = "./proto";
+
+// AgentService defines the RPC interface between Base and Plus
+service AgentService {
+    // StartPlus starts the Plus process
+    rpc StartPlus(StartPlusRequest) returns (StartPlusResponse);
+    
+    // StopPlus stops the Plus process
+    rpc StopPlus(StopPlusRequest) returns (StopPlusResponse);
+    
+    // GetPlusStatus gets the status of the Plus process
+    rpc GetPlusStatus(GetPlusStatusRequest) returns (GetPlusStatusResponse);
+    
+    // ForwardMQTTMessage forwards MQTT messages from Base to Plus
+    rpc ForwardMQTTMessage(ForwardMQTTMessageRequest) returns (ForwardMQTTMessageResponse);
+    
+    // MessageNotice sync messages from Base to Plus
+    rpc MessageNotice(MessageNoticeRequest) returns (MessageNoticeResponse);
+    
+    // Task Management APIs
+    rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse);
+    rpc StartTask(StartTaskRequest) returns (StartTaskResponse);
+    rpc StopTask(StopTaskRequest) returns (StopTaskResponse);
+    rpc GetTaskStatus(GetTaskStatusRequest) returns (GetTaskStatusResponse);
+    rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+    
+    // Plugin Management APIs
+    rpc LoadPlugin(LoadPluginRequest) returns (LoadPluginResponse);
+    rpc UnloadPlugin(UnloadPluginRequest) returns (UnloadPluginResponse);
+    rpc ExecutePlugin(ExecutePluginRequest) returns (ExecutePluginResponse);
+    rpc ListPlugins(ListPluginsRequest) returns (ListPluginsResponse);
+}
+
+// StartPlusRequest is the request message for StartPlus
+message StartPlusRequest {
+    // No parameters needed for now
+}
+
+// StartPlusResponse is the response message for StartPlus
+message StartPlusResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// StopPlusRequest is the request message for StopPlus
+message StopPlusRequest {
+    // No parameters needed for now
+}
+
+// StopPlusResponse is the response message for StopPlus
+message StopPlusResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// GetPlusStatusRequest is the request message for GetPlusStatus
+message GetPlusStatusRequest {
+    // No parameters needed for now
+}
+
+// GetPlusStatusResponse is the response message for GetPlusStatus
+message GetPlusStatusResponse {
+    int32 status = 1;     
+    string version = 2;    
+    string upgrade = 3;    
+    string plugins = 4;    
+    string runningtask = 5; 
+    string failedtask = 6; 
+}
+
+// ForwardMQTTMessageRequest is the request message for ForwardMQTTMessage
+message ForwardMQTTMessageRequest {
+    string topic = 1;
+    bytes payload = 2;
+}
+
+// ForwardMQTTMessageResponse is the response message for ForwardMQTTMessage
+message ForwardMQTTMessageResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// MessageNoticeRequest is the request message for MessageNotice
+message MessageNoticeRequest {
+    int32 type = 1;
+    string message = 2;
+}
+
+// MessageNoticeResponse is the response message for MessageNotice
+message MessageNoticeResponse {
+    int32 type = 1;
+    string message = 2;
+}
+
+// Task Management Messages
+message CreateTaskRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string command = 4;
+    string schedule = 5;
+}
+
+message CreateTaskResponse {
+    bool success = 1;
+    string message = 2;
+    string task_id = 3;
+}
+
+message StartTaskRequest {
+    string task_id = 1;
+}
+
+message StartTaskResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message StopTaskRequest {
+    string task_id = 1;
+}
+
+message StopTaskResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetTaskStatusRequest {
+    string task_id = 1;
+}
+
+message GetTaskStatusResponse {
+    bool success = 1;
+    string message = 2;
+    string status = 3; // "running", "stopped", "scheduled", "error"
+    string pid = 4;
+    int64 start_time = 5;
+    int64 end_time = 6;
+}
+
+message ListTasksRequest {
+    // Optional filters
+    string status_filter = 1;
+}
+
+message ListTasksResponse {
+    bool success = 1;
+    string message = 2;
+    repeated TaskInfo tasks = 3;
+}
+
+message TaskInfo {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string status = 4;
+    string command = 5;
+    string schedule = 6;
+    string pid = 7;
+    int64 start_time = 8;
+    int64 end_time = 9;
+}
+
+// Plugin Management Messages
+message LoadPluginRequest {
+    string plugin_path = 1;
+}
+
+message LoadPluginResponse {
+    bool success = 1;
+    string message = 2;
+    string plugin_id = 3;
+}
+
+message UnloadPluginRequest {
+    string plugin_id = 1;
+}
+
+message UnloadPluginResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message ExecutePluginRequest {
+    string plugin_id = 1;
+    map<string, string> parameters = 2;
+}
+
+message ExecutePluginResponse {
+    bool success = 1;
+    string message = 2;
+    string result = 3;
+}
+
+message ListPluginsRequest {
+    // Optional filters
+    string status_filter = 1;
+}
+
+message ListPluginsResponse {
+    bool success = 1;
+    string message = 2;
+    repeated PluginInfo plugins = 3;
+}
+
+message PluginInfo {
+    string id = 1;
+    string name = 2;
+    string path = 3;
+    string status = 4; // "loaded", "unloaded"
+    string description = 5;
+}

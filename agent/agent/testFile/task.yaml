@@ -1,0 +1,16 @@
+type: mysql
+taskId: T20251216004
+connection:
+  host: 192.168.78.20
+  port: 3306
+  database: test_ecommerce
+  username: root
+  password: 123123
+  charset: utf8mb4
+  timeout: 60
+  sslMode: disabled
+execute:
+  transactionMode: single      # single/multiple/none
+  onError: rollback            # rollback/stop
+  sqlList:
+    - "SELECT u.username, p.name, o.quantity, o.total_amount, o.status FROM orders o LEFT JOIN users u ON o.user_id = u.id LEFT JOIN products p ON o.product_id = p.id;"

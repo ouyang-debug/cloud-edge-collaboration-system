@@ -1,0 +1,10 @@
+AgentName: testAgent
+NetIf: WLAN
+StatusApi: /task-status
+ResultDataApi: /agent/dispatchdata
+ResultSyncApi: /agent/result_sync
+LogSyncApi: /logs
+HeartbeatTopic: agent/heartbeat/{clientID}
+DispatchTopic: agent/{clientID}/#
+AckTopic: agent/ack/{clientID}
+RegisterUrl: /api/env-node-registration

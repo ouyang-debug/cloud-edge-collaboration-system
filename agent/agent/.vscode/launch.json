@@ -1,0 +1,67 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Base Component",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {},
+            "args": [],
+            "showLog": true
+        },
+        {
+            "name": "Launch Plus Component",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {},
+            "args": [
+                "plus"
+            ],
+            "showLog": true
+        },
+        {
+            "name": "Debug Base Component Test",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/base",
+            "showLog": true
+        },
+        {
+            "name": "Debug Plus Component Test",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/plus",
+            "showLog": true
+        },
+        {
+            "name": "Attach to Process",
+            "type": "go",
+            "request": "attach",
+            "mode": "local",
+            "processId": 0
+        },
+        {
+            "name": "Remote Debug Go",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "port": 6000,
+            "host": "localhost", // 目标机器IP
+            "substitutePath": [
+                {
+                    "from": "${workspaceFolder}",
+                    "to": "/mnt/d/CEAM/260205/agent/agent" // 用工作区变量替代硬编码路径（避免格式错误）
+                }
+            ]
+        }
+    ]
+}

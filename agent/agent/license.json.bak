@@ -1,0 +1,9 @@
+{
+  "Broker": "192.168.245.100",
+  "Port": 1883,
+  "ClientID": "agent_766026667872325",
+  "Username": "mqtt",
+  "Password": "mqtt123123",
+  "Server": "http://192.168.245.100:8081",
+  "Token": "Drs6FKRJt1VIlzCEgzVs+w=="
+}
