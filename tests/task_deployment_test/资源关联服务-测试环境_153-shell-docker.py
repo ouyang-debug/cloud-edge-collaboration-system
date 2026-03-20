@@ -1,5 +1,6 @@
 import logging
 import time
+from selenium.webdriver.edge.options import Options
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 # ====================== 核心配置 ======================
 DRIVER_PATH = r'D:\edgedriver\edgedriver_win64\msedgedriver.exe'  # 替换成你的驱动路径
-LOGIN_URL = 'http://10.220.42.152:8080'  # 替换成实际登录页URL
+LOGIN_URL = 'https://10.220.42.152:8080'  # 替换成实际登录页URL
 USERNAME = 'admin'  # 用户名
 PASSWORD = ''  # 密码
 MAX_RETRY = 3  # 最大重试次数
@@ -41,7 +42,12 @@ def login_with_retry():
         try:
             # 初始化浏览器
             service = Service(executable_path=DRIVER_PATH)
-            driver = webdriver.Edge(service=service)
+            # driver = webdriver.Edge(service=service)
+            options = Options()
+            # 忽略证书错误
+            options.add_argument("--ignore-certificate-errors")
+            options.add_argument("--ignore-ssl-errors")
+            driver = webdriver.Edge(options=options)
             driver.set_page_load_timeout(300)  # 页面加载超时
             driver.maximize_window()
             logger.info(f"第 {retry_count + 1} 次尝试登录，打开页面：{LOGIN_URL}")
@@ -376,17 +382,15 @@ def click_new_task_button(driver, step_div_index=None):
         # 命令配置列表 - 可以通过注释来启用或禁用特定命令
         # shell命令列表
         shell_commands = [
-            "mkdir -p /data/nginx/conf /data/nginx/logs /data/nginx/html",
+            "mkdir -p /data/nginx/conf /data/nginx/logs /data/nginx/html /data/nginxdockerinfo",
             "chown -R 101:101 /data/nginx",
             "chmod -R 755 /data/nginxdockerinfo",
             '''cat > /data/nginx/conf/default.conf << 'EOF'
 server {
     listen       80;
     server_name  localhost;
-    # 日志输出到挂载目录
     access_log  /var/log/nginx/access.log;
     error_log   /var/log/nginx/error.log;
-    # 静态文件指向挂载目录
     location / {
         root   /usr/share/nginx/html;
         index  index.html index.htm;
