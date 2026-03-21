@@ -206,7 +206,7 @@ def select_environment_and_service(driver):
         logger.info("✅ 点击测试环境_153展开箭头成功")
 
         # 等待测试环境展开
-        time.sleep(1)
+        time.sleep(2)
         # 截图确认展开状态
         # screenshot_path = f"environment_expanded_{int(time.time())}.png"
         # driver.save_screenshot(screenshot_path)
@@ -269,7 +269,7 @@ def click_new_task_button(driver, step_div_index=None):
         # 点击新建任务按钮
         logger.info("开始点击新建任务按钮")
         # new_task_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[1]/div/div[1]/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[1]/td[8]/div/button[3]"
-        new_task_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[1]/div/div[1]/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[11]/td[8]/div/button[3]/span"
+        new_task_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[1]/div/div[1]/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[13]/td[7]/div/button[3]/span"
         new_task_button = wait.until(
             EC.element_to_be_clickable((By.XPATH, new_task_xpath))
         )
@@ -376,15 +376,15 @@ def click_new_task_button(driver, step_div_index=None):
         add_step_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/div/div/form/div[4]/div[1]/button/span"
         # shell插件选择按钮XPath
         shell_plugin_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[10]/div/div/div/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[1]/td[9]/div/button/span"
-        # dockercapture插件选择按钮XPath
-        dockercapture_plugin_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[10]/div/div/div/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[9]/td[9]/div/button/span"
+        # docker插件选择按钮XPath
+        docker_plugin_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[10]/div/div/div/div[2]/div[1]/div[3]/div/div[1]/div/table/tbody/tr[10]/td[9]/div/button/span"
 
         # 命令配置列表 - 可以通过注释来启用或禁用特定命令
         # shell命令列表
         shell_commands = [
-            "mkdir -p /data/nginx/conf /data/nginx/logs /data/nginx/html /data/nginxdockerinfo",
+            "mkdir -p /data/nginx/conf /data/nginx/logs /data/nginx/html",
             "chown -R 101:101 /data/nginx",
-            "chmod -R 755 /data/nginxdockerinfo",
+            "chmod -R 755 /data/nginx",
             '''cat > /data/nginx/conf/default.conf << 'EOF'
 server {
     listen       80;
@@ -403,8 +403,8 @@ EOF''',
             # "dockernetwork",  # 查看Docker网络（示例：已注释）
         ]
         
-        # dockercapture命令
-        dockercapture_command = "docker-compose up -d"  # 查看Docker容器统计信息
+        # docker命令
+        docker_command = "docker-compose up -d"  # 查看Docker容器统计信息
         
         # 生成步骤配置列表
         steps_config = []
@@ -418,12 +418,12 @@ EOF''',
                 "plugin_button_xpath": shell_plugin_button_xpath
             })
         
-        # 添加dockercapture命令步骤
+        # 添加docker命令步骤
         steps_config.append({
             "name": str(len(shell_commands) + 1),
-            "plugin": "dockercapture",
-            "command": dockercapture_command,
-            "plugin_button_xpath": dockercapture_plugin_button_xpath
+            "plugin": "docker",
+            "command": docker_command,
+            "plugin_button_xpath": docker_plugin_button_xpath
         })
 
         # 处理每个步骤
@@ -500,7 +500,7 @@ EOF''',
             # 等待插件选择窗口弹出
             logger.info("等待插件选择窗口弹出")
             # 使用更短的等待时间，避免长时间超时
-            short_wait = WebDriverWait(driver, 5)
+            short_wait = WebDriverWait(driver, 2)
             try:
                 # 尝试使用标题定位
                 short_wait.until(EC.presence_of_element_located((By.XPATH, "//*[contains(text(), '选择任务插件')]")))
@@ -589,8 +589,8 @@ EOF''',
             """, command_input)
             logger.info("✅ 触发输入事件成功")
             
-            # 对于步骤7（dockercapture插件），需要先选择文件，再填写命令
-            if step_name == "7" and plugin_name == "dockercapture":
+            # 对于步骤7（docker插件），需要先选择文件，再填写命令
+            if step_name == "7" and plugin_name == "docker":
                 logger.info("开始选择配置文件")
                 # 点击配置文件选择按钮
                 config_file_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/div/div/form/div[4]/div[8]/div[7]/div/div[1]/button"
@@ -624,10 +624,10 @@ EOF''',
                 )
                 config_file_confirm.click()
                 logger.info("✅ 点击确认按钮成功")
-                
+                time.sleep(5)  # 等待点击确认后的页面响应                
                 # 等待配置文件选择窗口关闭
-                wait.until(EC.invisibility_of_element_located((By.XPATH, "//div[contains(@class, 'el-dialog')]")))
-                logger.info("✅ 配置文件选择窗口关闭成功")
+                # wait.until(EC.invisibility_of_element_located((By.XPATH, "//div[contains(@class, 'el-dialog')]")))
+                # logger.info("✅ 配置文件选择窗口关闭成功")
                 
                 # 填写Command（在选择文件后）
                 logger.info("开始填写Command")
@@ -651,7 +651,7 @@ EOF''',
                 for part in command_parts:
                     command_input.send_keys(part)
                     # 短暂等待，确保输入被处理
-                    time.sleep(0.1)
+                    time.sleep(1)
                 
                 # 验证Command是否填写成功
                 filled_command = command_input.get_attribute("value")
@@ -670,37 +670,55 @@ EOF''',
                 """, command_input)
                 logger.info("✅ 触发输入事件成功")
 
-        # 添加等待时间，确保所有步骤配置完成
-        logger.info("等待2秒，确保所有步骤配置完成")
-        # time.sleep(500)
-        
-        # 点击确认按钮
-        logger.info("开始点击确认按钮")
-        confirm_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/footer/span/button[2]/span"
-        confirm_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))
-        )
-        # 确保按钮可见
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", confirm_button)
-        # 使用JavaScript点击，避免可能的点击拦截
-        driver.execute_script("arguments[0].click();", confirm_button)
-        logger.info("✅ 点击确认按钮成功")
+                # 添加等待时间，确保所有步骤配置完成
+                logger.info("等待2秒，确保所有步骤配置完成")
+                time.sleep(2)
+                
+                # 点击确认按钮
+                logger.info("开始点击确认按钮")
+                confirm_button_xpath = "/html/body/div[1]/div/section/section/main/div[3]/div/section/main/div[8]/div/div/footer/span/button[2]"
+                confirm_button = wait.until(
+                    EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))
+                )
+                # 确保按钮可见
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", confirm_button)
+                time.sleep(1)
+                # 使用JavaScript点击，避免可能的点击拦截
+                # driver.execute_script("arguments[0].click();", confirm_button)
+                driver.execute_script("""
+            // 触发鼠标悬停
+            var event = new MouseEvent('mouseover', {bubbles: true, cancelable: true, view: window});
+            arguments[0].dispatchEvent(event);
+            
+            // 触发鼠标按下
+            event = new MouseEvent('mousedown', {bubbles: true, cancelable: true, view: window});
+            arguments[0].dispatchEvent(event);
+            
+            // 触发点击
+            event = new MouseEvent('click', {bubbles: true, cancelable: true, view: window});
+            arguments[0].dispatchEvent(event);
+            
+            // 触发鼠标释放
+            event = new MouseEvent('mouseup', {bubbles: true, cancelable: true, view: window});
+            arguments[0].dispatchEvent(event);
+        """, confirm_button)
+                logger.info("✅ 点击确认按钮成功")
+                # 增加等待时间，确保页面跳转
+                logger.info("等待页面跳转...")
+                time.sleep(5)
+                # 等待任务创建成功
+                logger.info("等待任务创建成功")
+                wait.until(EC.invisibility_of_element_located((By.XPATH, "//*[contains(text(), '新建任务')]")))
+                logger.info("✅ 任务创建完成")
 
-        # 等待任务创建成功
-        logger.info("等待任务创建成功")
-        wait.until(EC.invisibility_of_element_located((By.XPATH, "//*[contains(text(), '新建任务')]")))
-        logger.info("✅ 任务创建完成")
-
-        return True
-
+                return True
     except Exception as e:
         logger.error(f"❌ 点击新建任务按钮失败：{str(e)}")
         # 截图保存以便调试
-        # screenshot_path = f"new_task_error_{int(time.time())}.png"
-        # driver.save_screenshot(screenshot_path)
-        # logger.error(f"❌ 已保存错误截图：{screenshot_path}")
-        return False
-
+        screenshot_path = f"new_task_error_{int(time.time())}.png"
+        driver.save_screenshot(screenshot_path)
+        logger.error(f"❌ 已保存错误截图：{screenshot_path}")
+        return False   
 
 # ====================== 主函数 ======================
 if __name__ == "__main__":
